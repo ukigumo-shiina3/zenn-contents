@@ -2,7 +2,7 @@
 title: "AZ-900の受験料無料が廃止!?"
 emoji: "📘"
 type: "tech"
-topics: [Microsoft] [Azure] [資格] [az900]
+topics: [Microsoft, Azure, 資格, az900]
 published: true
 ---
 
