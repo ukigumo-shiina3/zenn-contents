@@ -1,6 +1,6 @@
 ---
-title: "Unreal Engineを学ぶときにまず押さえておいた方がいい動画と記事"
-emoji: "🔰"
+title: "Unreal Engineを学ぶときにまず押さえておいた方が良いこと"
+emoji: "📝"
 type: "tech"
 topics: [Unreal Engine, Unreal Engine 5, ue5, Unity, 入門, 初心者]
 published: true
