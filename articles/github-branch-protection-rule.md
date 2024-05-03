@@ -1,9 +1,9 @@
 ---
-title: "Githubのブランチの保護ルール設定"
+title: "[Github]ブランチの保護ルール設定"
 emoji: "🔧"
 type: "tech"
 topics: [Github, Git]
-published: true
+published: false
 ---
 
 Github ではリポジトリごとにブランチの保護ルール設定ができます。
