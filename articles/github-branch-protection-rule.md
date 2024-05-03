@@ -1,5 +1,5 @@
 ---
-title: "[Github]ブランチの保護ルール設定"
+title: "Githubのブランチの保護ルール設定"
 emoji: "🔧"
 type: "tech"
 topics: [Github, Git]

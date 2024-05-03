@@ -1,5 +1,5 @@
 ---
-title: "[gitmoji]絵文字のテンプレート"
+title: "gitmoji絵文字のテンプレート"
 emoji: "🐱"
 type: "tech"
 topics: [Github, Git, gitmoji]
