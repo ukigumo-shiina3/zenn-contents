@@ -6,7 +6,7 @@ topics: [Github, Git, gitmoji]
 published: true
 ---
 
-<h1>概要</h1>
+## 概要
 
 [gitmoji](https://gitmoji.dev/)とは git commit するときにコミットメッセージの先頭に絵文字を簡単に付けれるようになるツールのことです
 
