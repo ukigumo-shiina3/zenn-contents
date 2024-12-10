@@ -1,5 +1,5 @@
 ---
-title: "Linguiのi18n対応"
+title: "Linguiで解決するi18n対応の最適解"
 emoji: "🌐"
 type: "tech"
 topics: [nextjs, react, typescript, i18n, tech]
@@ -9,36 +9,100 @@ published: false
 ## はじめに
 
 この記事は、[PLEX Advent Calendar 2024](https://qiita.com/advent-calendar/2024/plex)の 12 日目の記事です。
-現在当社では i18n 対応をしているプロダクトはありませんが、国外にサービスを展開せずとも、国内で非日本語ネイティブの人にとっては国際化対応をされることで、ターゲットの幅も広がり、導入の需要もあるかと思い、記事を執筆しました。
+現在、弊社では i18n 対応をしているプロダクトはありませんが、非日本語ネイティブのユーザーへの対応を通じてターゲット層を広げる可能性もあるのではと感じ、この記事を執筆しました。
+今回はインストールやセットアップ周りでなく、Lingui でできることや流れに重点を置いて解説します。
 
 ## i18n 対応とは
 
 ソフトウェアやウェブサイトを国際化する対応のことを指します。
-具体的には、異なる言語や文化圏のユーザーに対応するために、テキストの翻訳、日付や数値、通貨のフォーマット対応などフトウェアを適応させるプロセスを含みます。
+具体的には、異なる言語や文化圏のユーザーに対応するために、テキストの翻訳、日付や数値、通貨のフォーマット対応などフトウェア適用させるプロセスを含みます。
 i18n という略称は、「Internationalization」の最初の「I」と最後の「n」の間に 18 文字があることに由来します。
 
 ## Lingui とは
 
 [Lingui](https://lingui.dev/)は JavaScript/TypeScript アプリケーション、特に Next.js を使用した国際化（i18n）に対応するためのライブラリになります。
 [Next.js 公式](https://nextjs.org/docs/app/building-your-application/routing/internationalization)の Internationalization ページの下部にも Lingui がおすすめされています。
-また記事執筆時点の 2024 年 12 月 12 日時点でも[Github のスター数](https://github.com/lingui/js-lingui)は 4.7k なのである程度の支持を受けているライブラリになります。
+また記事執筆の 2024 年 12 月 12 日時点でも[Github のスター数](https://github.com/lingui/js-lingui)は 4.7k のスター数を獲得しており、多くの開発者から支持されているライブラリです。
+インストールやセットアップについては、 Lingui の[インストール](https://lingui.dev/installation)と Next.js の[Internationalization](https://nextjs.org/docs/app/building-your-application/routing/internationalization)[Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)に関する公式ドキュメントを参考にしてください
 
 ## 特徴
 
 大きな特徴としては、自動的に未翻訳の文字列を検出することができたり、翻訳ファイルを生成・更新する CLI コマンドを提供してくれています。
-有名な i18n 対応のライブラリの[Next-Intl](https://next-intl-docs.vercel.app/)と比較すると 、Lingui の方が翻訳作業の効率化、自動化が可能であり、未翻訳の文字列を検出する仕組みがデフォルトで用意されており、翻訳の漏れを防ぎやすいといったメリットがあります。
-また、Next-Intl は Next.js に特化しているため、Next.js アプリケーション以外には使いにくかったり、翻訳文字列の管理については基本的なファイルベースのサポートに留まってしまうことから、Lingui の方がフレームワークの多様性があります。
+有名な i18n ライブラリである[Next-Intl](https://next-intl-docs.vercel.app/)と比較すると 、Lingui の方が翻訳作業の効率化、自動化が自動化がしやすく、未翻訳の文字列を検出する仕組みがデフォルトで用意されており、翻訳の漏れを防ぎやすいといったメリットがあります。またフレームワークは Next.js、React、Vue.js、TypeScript、Gatsby など幅広いフレームワークに対応しています。
+Next-Intl では翻訳対象が膨大になると、自身で設定した対象のキーが抜けているとその分翻訳の漏れが起きます。
+また、Next-Intl は Next.js に特化しているため、使用できるフレームワークが限定的というデメリットがあります。
 
 ## 基本的な実装の流れ
 
-1. Trans コンポーネントで追加した日本語を囲む
-2. npm run lingui:extract で追加した日本語が message.json に書き出される
-3. json の translation に対応する英語を追記する
-4. npm run lingui:compile でコンパイルして変更を反映する
+1. ロケール（言語）の定義
+2. パスの設定
+3. 翻訳文字列の管理
+4. 翻訳ファイルの生成と管理
 
-## Trans コンポーネント
+それぞれ通貨を題材に日本語から英語の翻訳を解説していきます。
 
+## 1. ロケール（言語）の定義
+
+- ロケール（言語）の設定ファイルを追加します。
+
+```js:/lingui.config.ts
+import type { LinguiConfig } from '@lingui/conf'
+import { formatter } from '@lingui/format-json'
+
+export default {
+  locales: ['ja', 'en'], // 日本語と英語のため「ja」と「en」を設定
+  fallbackLocales: { default: 'ja' }, // 翻訳ファイルがなかったときに最終的に日本語にするため、 default は「ja」で設定
+  catalogs: [
+    {
+      path: '<rootDir>/src/i18n/locales/{locale}/messages', // 翻訳ファイルの保存場所を設定
+      include: ['src'], // 翻訳文字列を抽出するフォルダを設定
+    },
+  ],
+  format: formatter({ style: 'lingui' }), //  JSON 形式でのォーマットを設定
+} as const satisfies LinguiConfig
 ```
+
+## 2. パスの設定
+
+- ユーザーからのリクエストを処理する前に、ミドルウェアを使って前処理を行い、パスを書き換える
+- URL の末尾に「/ja」の場合は、日本語のページに遷移させる
+- URL の末尾に「/en」の場合は、英語のページに遷移させる
+
+```js:/src/middleware.ts
+import Negotiator from 'negotiator'
+import { type NextRequest, NextResponse } from 'next/server'
+import { defaultLocale, locales } from './i18n/util/locales'
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const pathnameHasLocale = locales.some(
+    locale => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
+  )
+  if (pathnameHasLocale) {
+    return
+  }
+
+  const locale = getRequestLocale(request.headers)
+  request.nextUrl.pathname = `/${locale}${pathname}`
+  return NextResponse.redirect(request.nextUrl) // ユーザーからリクエストがあったpathnameに応じてリダイレクトさせる
+}
+
+function getRequestLocale(requestHeaders: Headers): string {
+  const langHeader = requestHeaders.get('accept-language') || undefined // accept-languageでブラウザの言語を読み込む
+  const languages = new Negotiator({ headers: { 'accept-language': langHeader } }).languages(locales.slice()) //localsで設定している言語を読み取る(今回は日本語と英語)
+  const activeLocale = languages[0] || locales[0] || defaultLocale
+  return activeLocale
+}
+```
+
+## 3.翻訳文字列の管理
+
+### Trans コンポーネント
+
+- @lingui/react から提供されるコンポーネントで、JSX 内での翻訳に使用されます。
+- 動的な値（変数）も埋め込めむことができる。
+
+```js:/src/component/Currency.tsx
 import {  Trans } from '@lingui/macro'
 import { useLingui } from '@lingui/react'
 
@@ -68,20 +132,39 @@ export function Currency() {
 }
 ```
 
-- 今回は通貨を例に Trans コンポーネントで翻訳対象を囲む
+- Trans コンポーネントで翻訳対象の通貨の文字列を囲む
 
-## npm run lingui:extract の実行
+### t マクロ
 
-基本的な動作
+- @lingui/macro からインポートされるユーティリティで、プレーンな翻訳文字列を扱う際に使用します。
+- JSX 外部や動的な変数を翻訳文字列に組み込みたい場合に使用します。
 
-- ソースコードをスキャンして、Lingui マクロ（例: t、Trans）で記述された文字列を抽出。
-- lingui.config.js に指定されたロケール（例: en, ja）ごとに翻訳ファイルを更新。
-- 新しく検出された翻訳可能な文字列を翻訳ファイルに追加。
-
-src/i18n/locales/en/messages.json
-
+```js:/src/component/Currency.tsx
+function handleClick() {
+   alert(t(i18n)`翻訳完了！`)}
+}
 ```
+
+## 4.翻訳ファイルの生成と管理
+
+- npm run lingui:extract を実行することで、翻訳可能な文字列をコードから自動抽出できる
+- ソースコードをスキャンして、Lingui マクロ（例: t、Trans）で囲まれた文字列を抽出。
+- lingui.config.js に指定されたロケール（例: en, ja）ごとに翻訳ファイルを更新。
+- 新しく検出された翻訳可能な文字列を翻訳ファイル(message.json)に追加。
+
+```js:/src/i18n/locales/en/messages.json
 {
+    "3KWAVh": {
+    "translation": "",
+    "message": "円",
+    "comments": [],
+    "origin": [
+      [
+        "src/component/Currency.tsx",
+        10
+      ]
+    ]
+  },
   "hRIVGz": {
     "translation": "",
     "message": "ドル",
@@ -104,31 +187,23 @@ src/i18n/locales/en/messages.json
       ]
     ]
   },
-  "3KWAVh": {
-    "translation": "",
-    "message": "円",
-    "comments": [],
-    "origin": [
-      [
-        "src/component/Currency.tsx",
-        10
-      ]
-    ]
-  }
+
 }
 
 ```
 
-## json の translation に対応する英語を追記する
+### JSON ファイルの translation フィールドに対応する英語を追記する
 
 - npm run lingui:extract を実行し、messages.json に　先ほどの Trans コンポーネントで囲った翻訳対象が書き出される
 - それぞれの translation のフィールドの値には何も入っていない状態なので、翻訳したい文字を埋める
+- src/i18n/locales/ja/messages.json の json ファイルと src/i18n/locales/en/messages.json の両方のファイルがあるが、日本語から英語にするので、src/i18n/locales/en/messages.json に翻訳したい文字列を埋める
+- 空白のままだと何も翻訳されずに、日本語のまま表示される
 
-```
+```js:/src/i18n/locales/en/messages.json
 {
   "hRIVGz": {
-    "translation": "Dollar",
-    "message": "ドル",
+    "translation": "Yen" // Yenを追記する
+    "message": "円",
     "comments": [],
     "origin": [
       [
@@ -137,29 +212,17 @@ src/i18n/locales/en/messages.json
       ]
     ]
   },
-  "E1t6Eh": {
-    "translation": "Euro",
-    "message": "ユーロ",
-    "comments": [],
-    "origin": [
-      [
-        "src/component/Currency.tsx",
-        22
-      ]
-    ]
-  },
-  "3KWAVh": {
-    "translation": "Yen",
-    "message": "円",
-    "comments": [],
-    "origin": [
-      [
-        "src/component/Currency.tsx",
-        10
-      ]
-    ]
-  }
 }
 ```
 
-## npm run lingui:compile でコンパイルして変更を反映する
+### 翻訳ファイルのコンパイル
+
+- npm run lingui:compile を実行し、翻訳がアプリケーションで利用可能な形式に変換する
+- この実装によって日本語と英語を URL のパスを切り替えることによって、多言語翻訳が完了します。[実装のサンプル動画](https://vimeo.com/1037723122?share=copy)から実際の挙動を見ていただければと思います。
+
+## さいごに
+
+Lingui を使った i18n 対応の基本的な流れを解説しました。
+今回初めて i18n 対応に触れてみましたが、Lingui を利用することで、翻訳文字列の抽出や管理が自動化され、効率的に多言語対応を実現できます。
+Lingui は初めて i18n 対応に取り組む方にもおすすめです。まずは小さなプロジェクトで試し、翻訳管理や多言語対応の便利さを体感してみてください。
+最後まで読んでいただきありがとうございました！
