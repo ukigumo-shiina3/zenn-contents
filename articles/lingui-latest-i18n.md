@@ -15,7 +15,7 @@ published: false
 ## i18n 対応とは
 
 ソフトウェアやウェブサイトを国際化する対応のことを指します。
-具体的には、異なる言語や文化圏のユーザーに対応するために、テキストの翻訳、日付や数値、通貨のフォーマット対応などフトウェア適用させるプロセスを含みます。
+具体的には、異なる言語や文化圏のユーザーに対応するために、テキストの翻訳、日付や数値、通貨のフォーマット対応などソフトウェア適用させるプロセスを含みます。
 i18n という略称は、「Internationalization」の最初の「I」と最後の「n」の間に 18 文字があることに由来します。
 
 ## Lingui とは
@@ -23,7 +23,7 @@ i18n という略称は、「Internationalization」の最初の「I」と最後
 [Lingui](https://lingui.dev/)は 、国際化（i18n）に対応するためのライブラリになります。
 [Next.js 公式](https://nextjs.org/docs/app/building-your-application/routing/internationalization)の Internationalization ページ下部にも Lingui がおすすめされています。
 また記事執筆の 2024 年 12 月 12 日時点でも[Github のスター数](https://github.com/lingui/js-lingui)は 4.7k のスター数を獲得しており、多くの開発者から支持されているライブラリです。
-インストールやセットアップについては、 Lingui の[インストール](https://lingui.dev/installation)と Next.js の[Internationalization](https://nextjs.org/docs/app/building-your-application/routing/internationalization)[Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)に関する公式ドキュメントを参考にしてください。
+インストールやセットアップについては、 Lingui の[インストール](https://lingui.dev/installation)と Next.js の[Internationalization](https://nextjs.org/docs/app/building-your-application/routing/internationalization)、[Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)に関する公式ドキュメントを参考にしてください。
 
 ## Lingui の主な特徴と Next-Intl との違い
 
