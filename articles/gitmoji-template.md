@@ -2,7 +2,7 @@
 title: "gitmojiの絵文字テンプレート"
 emoji: "🐱"
 type: "tech"
-topics: [Github, Git, gitmoji]
+topics: ["github", "git", "gitmoji"]
 published: true
 ---
 

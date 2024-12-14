@@ -2,7 +2,7 @@
 title: "Propsのバケツリレーを回避する方法"
 emoji: "🌟"
 type: "tech"
-topics: [React, Tech]
+topics: ["react", "nextjs", "typescript", "tech"]
 published: true
 ---
 
