@@ -2,7 +2,7 @@
 title: "Linguiで解決するi18n対応の最適解"
 emoji: "🌐"
 type: "tech"
-topics:[ "nextjs", "react", "typescript", "i18n", "tech"]
+topics: ["nextjs", "react", "typescript", "i18n", "tech"]
 published: true
 ---
 
