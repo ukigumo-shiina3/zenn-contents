@@ -1,5 +1,5 @@
 ---
-title: "VercelのGrepで爆速コード検索！Github検索は時代遅れ？"
+title: "VercelのGrepで爆速コード検索！Github検索は時代遅れ!?"
 emoji: "🔍"
 type: "tech"
 topics: ["vercel", "github", "tech"]
@@ -8,6 +8,7 @@ published: false
 
 ## はじめに
 
+[PLEX Advent Calendar 2024](https://qiita.com/advent-calendar/2024/plex)の 17 日目の記事です。
 この記事では、[Vercel](https://vercel.com/home) が [買収](https://vercel.com/blog/vercel-acquires-grep)した高速コード検索サービス[Grep](https://grep.app/) を、実際に使ってみた感想とともとに、その特徴を解説します。
 Vercel の CEO である Guillermo Rauch が [ 買収を発表した投稿](https://x.com/rauchg/status/1859365672444363037)からも、かなり期待が高まっています。
 従来のコード検索といえば GitHub が一般的ですが、検索速度の遅さや UI/UX の課題に不満を感じる方も多いのではないでしょうか。
