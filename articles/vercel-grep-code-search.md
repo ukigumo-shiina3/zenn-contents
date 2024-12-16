@@ -1,5 +1,5 @@
 ---
-title: "VercelのGrepで爆速コード検索！Github検索は時代遅れ！？"
+title: "VercelのGrepで爆速コード検索！GitHub検索は時代遅れ！？"
 emoji: "🔍"
 type: "tech"
 topics: ["vercel", "github"]
@@ -31,8 +31,8 @@ GitHub と Grep の検索結果の速度をデモ動画で比較してみまし�
 
 ![](https://storage.googleapis.com/zenn-user-upload/9f8eeb29200a-20241216.gif)
 
-最初の動画が Github でその次が Grep になります。
-Github では、検索結果が表示されるまで数秒かかり、ややもどかしさを感じます。
+最初の動画が GitHub でその次が Grep になります。
+GitHub では、検索結果が表示されるまで数秒かかり、ややもどかしさを感じます。
 一方 Grep では、1 文字入力するごとに検索結果が即座に更新されます。
 この高速さは、事前にコードをインデックス化しておくことで実現しているのではないかと私は考えています。GitHub と比較すると、その速度の差が一目瞭然です。
 
