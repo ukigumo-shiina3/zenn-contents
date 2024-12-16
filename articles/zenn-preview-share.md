@@ -2,7 +2,7 @@
 title: "Zennの下書きを公開前に簡単シェア！誰でもレビューできる方法"
 emoji: "🙌"
 type: "tech"
-topics: ["zenn", "zenncli", "github", "tech"]
+topics: ["zenn", "zenncli", "github"]
 published: true
 ---
 
