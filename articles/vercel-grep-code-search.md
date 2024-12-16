@@ -29,7 +29,9 @@ Grep の主な特徴は以下の通りです。
 ドキュメントを読むだけでは、API の概要はわかるものの、実際のユースケースが気になることも多いでしょう。Grep を使えば、数百の実例を瞬時に見つけることができます。
 GitHub と Grep の検索結果の速度をデモ動画で比較してみましょう。
 
-![](https://storage.googleapis.com/zenn-user-upload/9f8eeb29200a-20241216.gif)
+https://www.youtube.com/watch?v=gHOR4CxjmeM
+
+https://youtu.be/S5thNtChrmI
 
 最初の動画が GitHub でその次が Grep になります。
 GitHub では、検索結果が表示されるまで数秒かかり、ややもどかしさを感じます。
@@ -52,7 +54,9 @@ GitHub では、検索結果が表示されるまで数秒かかり、ややも�
 
 **Use regular expression** : 正規表現で高度な検索が可能。例: `const\s+use[A-Z][a-zA-Z]\*` でカスタムフックを検索。
 
-![](https://storage.googleapis.com/zenn-user-upload/85e95081b4dd-20241216.gif)
+https://www.youtube.com/watch?v=IRktS-ma3iY
+
+https://www.youtube.com/watch?v=QifA-pdn0E4
 
 これらの絞り込みを活用すれば、より正確かつ効率的に目的の情報を見つけることができます。
 
