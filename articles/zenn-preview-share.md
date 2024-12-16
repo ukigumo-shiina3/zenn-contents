@@ -19,17 +19,27 @@ published: true
 ① **マイページから「記事の管理」を選択する**
 マイページのメニューから「記事の管理」をクリックします。
 
+![](https://storage.googleapis.com/zenn-user-upload/b65bf0353f18-20241216.png)
+
 ② **下書き記事の「表示を確認」をクリックする**
 リスト内にある下書き状態の記事の右側に、「表示を確認」するアイコンがあります。これをクリックします。
+
+![](https://storage.googleapis.com/zenn-user-upload/753c68aa8946-20241216.png)
 
 ③ **「このページを共有」をクリックする**
 ポップアップメニュー内に表示される「このページを共有」という項目を選択します。
 
+![](https://storage.googleapis.com/zenn-user-upload/4b8231f27ba1-20241216.png)
+
 ④ **公開範囲を「リンクを知っている全員」に変更する**
 デフォルトでは公開範囲が「自分のみ」になっていますが、「リンクを知っている全員」に変更してください。
 
+![](https://storage.googleapis.com/zenn-user-upload/25b15e1b7cc0-20241216.png)
+
 ⑤ **「リンクをコピー」をクリックして共有する**
 最後にリンクをコピーし、フィードバックをもらいたい相手に送ります。
+
+![](https://storage.googleapis.com/zenn-user-upload/75d9768d3260-20241216.png)
 
 ## さいごに
 
