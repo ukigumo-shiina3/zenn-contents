@@ -3,7 +3,7 @@ title: "VercelのGrepで爆速コード検索！GitHub検索は時代遅れ！�
 emoji: "🔍"
 type: "tech"
 topics: ["vercel", "github"]
-published: false
+published: true
 ---
 
 ## はじめに
