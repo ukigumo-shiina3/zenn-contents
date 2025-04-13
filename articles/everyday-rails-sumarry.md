@@ -8,17 +8,17 @@ published: true
 
 ## はじめに
 
-RSpec を体系的に学ぶために、[Everyday Rails - RSpec による Rails テスト入門](https://leanpub.com/everydayrailsrspec-jp)から、業務で使用している項目を抜粋してまとめた記事です。
+RSpecを体系的に学ぶために、[Everyday Rails - RSpec による Rails テスト入門](https://leanpub.com/everydayrailsrspec-jp)から、業務で使用している項目を抜粋してまとめた記事です。
 
-私の会社では[GraphQL Ruby](https://graphql-ruby.org/)を採用しているため、この記事ではモデルスペックを中心に取り上げます。そのため、以下のような理由からコントローラーや API、システムスペックについての解説は割愛しています。
+私の会社では[GraphQL Ruby](https://graphql-ruby.org/)を採用しているため、この記事ではモデルスペックに焦点を当てるため、以下のような理由からコントローラーやAPI、システムスペックについての解説は割愛しています。
 
-- GraphQL では `GraphqlController ` のみを使用しており、一般的なコントローラーは存在しないため、テスト対象外としています。
-- エンドポイントが `/graphql `の 1 つに集約されるため、REST API におけるリクエストスペックも対象外としています。
+- GraphQLではGraphqlController のみを使用しており、一般的なコントローラーは存在しないため、テスト対象外としています。
+- エンドポイントが/graphql の 1 つに集約されるため、REST APIにおけるリクエストスペックも対象外としています。
 
 ## 対象読者
 
-- これから RSpec を学びたい方
-- RSpec は使用したことはあるが、より理解を深めたい方
+- これからRSpecを学びたい方
+- RSpecは使用したことはあるが、より理解を深めたい方
 
 ## モデルスペック
 
@@ -39,17 +39,16 @@ it "is valid with a first name, last name, email, and password" do
 end
 ```
 
-- このケースでは be_valid という RSpec のマッチャを使って、モデルが有効な状態かどうかを検証しています。
-- true もしくは false になることを検証し、今回は戻り値が true になることを期待しています。
-- User モデルに定義されているバリデーションが、全て満たされているため、テストはパスします。
+- このケースではbe_validというRSpecのマッチャを使って、モデルが有効な状態かどうかを検証しています。
+- trueもしくはfalseになることを検証し、今回は戻り値がtrueになることを期待しています。
+- Userモデルに定義されているバリデーションが、全て満たされているため、テストはパスします。
 
 :::details マッチャ
 「期待値と実際の値を比較して、一致した（もしくは一致しなかった）という結果を返すオブジェクト」のこと
 :::
 
-# 名がなければ無効な状態であること
-
 ```rb:spec/models/user_spec.rb
+# 名がなければ無効な状態であること
 it "is invalid without a first name" do
   user = User.new(first_name: nil)
   user.valid?
@@ -59,18 +58,18 @@ end
 
 反対に有効でない場合もテストケースとして、作成する必要があります。
 
-新しく作ったユーザーに first_name に nil をセットし、バリデーションのチェックで、エラーメッセージが出力されることを期待します。
+新しく作ったユーザーにfirst_nameにnilをセットし、バリデーションのチェックで、エラーメッセージが出力されることを期待します。
 
 :::details include マッチャ
-繰り返し可能な値の中に、ある値が存在するか どうかをチェックする
+繰り返し可能な値の中に、ある値が存在するかどうかをチェックする
 :::
 
 ### テストが失敗するケースを確認
 
 また自分が作成したテストケースが失敗することをコードを変えてみて、テストが意図して動いていることを確認する」必要があります。
 
-例えば先ほどのテストケースの expect`(user.errors[:first_name]).to include("can't be blank")`の箇所を`expect(user.errors[:first_name]).to_not include("can't be blank")`と`to`から`to_not`に変えてみることでテストが意図して失敗するかを検証してみることは非常に重要です。
-また、先ほどのテストコードの変更を元に戻し(`to_not` を` to`に戻す)、モデルのバリデーションの`first_name`をコメントアウトして、テストを実行することでもテストの失敗を確認することができる
+例えば先ほどのテストケースのexpect(user.errors[:first_name]).to include("can't be blank")の箇所をexpect(user.errors[:first_name]).to_not include("can't be blank")と`to`から`to_not`に変えてみることでテストが意図して失敗するかを検証してみることは非常に重要です。
+また、先ほどのテストコードの変更を元に戻し(`to_not`を`to`に戻す)、Userモデルのfirst_nameのバリデーションをコメントアウトして、テストを実行することでもテストの失敗を確認することができる
 
 ### build と create の違い
 
@@ -98,15 +97,13 @@ RSpec.describe Project, type: :model do
 end
 ```
 
-ここでテストしたいのは、 一人のユーザーは同じ名前で二つのプロジェクトを作成できないが、ユーザーが異なるとき は同じ名前のプロジェクトを作成できる、という要件です。
-ちなみに build で作成している時と create で作成している箇所がありますが、違いは何になるか、下記に表してみました。
+ここでテストしたいのは、一人のユーザーは同じ名前で二つのプロジェクトを作成できないが、ユーザーが異なるときは同じ名前のプロジェクトを作成できる、という要件です。
+ちなみにbuildで作成している時とcreateで作成している箇所がありますが、違いは何になるか、下記に表してみました。
 
 **build**
+buildは、オブジェクトをメモリ上に生成しますが、データベースには保存しません。
 
-**データベースへの保存:**
-
-- `build` は、オブジェクトをメモリ上に生成しますが、データベースには保存しません。
-  **用途:**
+- **用途:**
   - オブジェクトの属性や関連付けを確認するテストに適しています。
   - データベースへの保存が不要なテスト、例えばモデルのバリデーションのテストなどで使用されます。
   - データベースへの保存を行わない為、テストの速度が create に比べて速いです。
@@ -115,10 +112,8 @@ end
   - データベースの状態を汚染しない。
 
 **create**
+create は、オブジェクトを生成し、データベースに保存します。
 
-**データベースへの保存:**
-
-- `create` は、オブジェクトを生成し、データベースに保存します。
 - **用途:**
   - データベースに保存されたオブジェクトの存在や状態を確認するテストに適しています。
   - 統合テストやシステムテストなど、データベースとの連携が必要なテストで使用されます。
@@ -126,13 +121,13 @@ end
   - データベースの状態を実際に確認できる。
   - 他のオブジェクトとの関連付けを永続化できる。
 
-今回のテストでは「ユーザー単位では重複したプロジェクト名を許可しないこと」をテストするので、まず create で`Test Project`を作成してデータベースに保存した上で、build して`Test Project`を作成して重複しているかのチェックを行うデータの準備をしています。
-2 つ目に`Test Project`を作成した場合はバリデーションのチェックのためだけに作成できていればいいので、データベースの保存は必要なく build の作成の方が適しているという考えになります。
+今回のテストでは「ユーザー単位では重複したプロジェクト名を許可しないこと」をテストするので、まずcreateでTestProjectを作成してデータベースに保存した上で、buildしてTestProjectを作成して重複しているかのチェックを行うデータの準備をしています。
+2つ目にTestProjectを作成した場合はバリデーションのチェックのためだけに作成できていればいいので、データベースの保存は必要なくbuildの作成の方が適しているという考えになります。
 
-## Factorybot
+## FactoryBot
 
-FactoryBot は、テスト用のダミーデータ（テストデータ）を簡単に作成するためのライブラリです。
-Rails アプリの User などのモデルを、テストごとにサクッと作れるようになります。
+FactoryBotは、テスト用のダミーデータ（テストデータ）を簡単に作成するためのライブラリです。
+RailsアプリのUserなどのモデルを、テストごとにサクッと作れるようになります。
 
 ```rb:spec/factories/users.rb
 FactoryBot.define do
@@ -146,11 +141,11 @@ end
 
 ```
 
-このように User の FactoryBot を追加することで、テスト内で FactoryBot.create(:user) と書くだけで、簡単に新しいユーザー を作成できるようになります。
-作成された際は、そのユーザーの名前は毎回 基本的に Aaron Sumner になります。メールアドレスやパスワードも最初から設定された状 態になります。
+このようにUserのFactoryBotを追加することで、テスト内でFactoryBot.create(:user)と書くだけで、簡単に新しいユーザーを作成できるようになります。
+作成されるユーザーの名前は、毎回基本的にAaronSumnerになります。メールアドレスやパスワードも最初から設定された状態になります。
 もちろん、文字列だけでなく、整数やブーリアン、日付など、属性に渡せるものなら何でも渡すことができます。
 
-`Factorybotを使った場合`
+`FactoryBotを使った場合`
 
 ```rb:spec/models/user_spec.rb
 it "has a valid factory" do
@@ -158,7 +153,7 @@ it "has a valid factory" do
 end
 ```
 
-`Factorybotを使わない場合`
+`FactoryBotを使わない場合`
 
 ```
 it "is valid with a first name, last name, email, and password" do
@@ -172,13 +167,12 @@ expect(user).to be_valid end
 
 ```
 
-Factorybot を使った場合と使わない場合を実際に見比べてみることで、ファクトリ版の方がより簡潔になっていることがわかると思います。
+FactoryBotを使った場合と使わない場合を実際に見比べてみることで、ファクトリ版の方がより簡潔になっていることがわかると思います。
 
 ### 属性をオーバーライドする
 
 ```rb:spec/models/user_spec.rb
 # 名がなければ無効な状態であること
-
 it "is invalid without a first name" do
   user = FactoryBot.build(:user, first_name: nil)
   user.valid?
@@ -187,23 +181,25 @@ end
 
 ```
 
-ここでは Factorybot で定義してある`first_name: "Aaron"`を`first_name: nil`と指定して、オーバーライドしています。
+ここではFactoryBotで定義してある`first_name: "Aaron"`を`first_name: nil`と指定して、オーバーライドしています。
 
 ### シーケンスを使ってユニークなデータを生成する
 
-ファクトリで複数 のユーザーをセットアップする必要が出てきた場合は実際のテストコードが走る前に例外が 発生します。
+ファクトリで複数のユーザーをセットアップする必要が出てきた場合は実際のテストコードが走る前に例外が発生します。
 たとえば以下のような場合です。
 
 ```
 
 # 複数のユーザーで何かする
 it "does something with multiple users" do
-  user1 = FactoryBot.create(:user) user2 = FactoryBot.create(:user) expect(true).to be_truthy
+  user1 = FactoryBot.create(:user)
+  user2 = FactoryBot.create(:user)
+  expect(true).to be_truthy
 end
 
 ```
 
-すると次のようなバリデーションエラーが発生します。
+1回目と2回目で同じメールアドレスが使われるため、一意制約に引っかかりバリデーションエラーが発生します。
 
 ```
 Failures:
@@ -214,7 +210,9 @@ Failures:
     Validation failed: Email has already been taken
 ```
 
-Factory Bot では シーケンス を使ってこのようなユニークバリデーションを持つフィール ドを扱うことができます。シーケンスはファクトリから新しいオブジェクトを作成するたび に、カウンタの値を 1 つずつ増やしながら、ユニークにならなければいけない属性に値を設 定します。ファクトリ内にシーケンスを作成して実際に使ってみます。
+FactoryBotではシーケンスを使ってこのようなユニークバリデーションを持つフィールドを扱うことができます。
+シーケンスはファクトリから新しいオブジェクトを作成するたびに、カウンタの値を1つずつ増やしながら、ユニークにならなければいけない属性に値を設定します。
+ファクトリ内にシーケンスを作成して実際に使ってみます。
 
 ```rb:spec/factories/users.rb
 FactoryBot.define do
@@ -227,12 +225,12 @@ FactoryBot.define do
 end
 ```
 
-メール文字列に n の値が入ることで重複を防ぐことができます。
-こうすれば新しいユー ザーを作成するたびに、tester1@example.com 、tester2@example.com というように、ユニークで 連続したメールアドレスが設定されます。
+メール文字列にnの値が入ることで重複を防ぐことができます。
+こうすれば新しいユーザーを作成するたびに、tester1@example.com、tester2@example.comというように、ユニークで連続したメールアドレスが設定されます。
 
 ### ファクトリで関連を扱う
 
-メモとプロジェクトのファクトリを作成し、Factory Bot で他のモデルと関連を持つモデルを扱ってみます。
+メモとプロジェクトのファクトリを作成し、FactoryBotで他のモデルと関連を持つモデルを扱ってみます。
 
 ```rb:spec/factories/notes.rb
 FactoryBot.define do
@@ -256,7 +254,7 @@ end
 ```
 
 ユーザーファクトリに少し情報を追加してみます。
-ファクトリに 名前を付けている 2 行目に、以下に示すような owner という別名(alias)を付けてみます。
+ファクトリに名前を付けている2行目に、以下に示すようなownerという別名(alias)を付けてみます。
 
 ```rb:spec/factories/users.rb
 FactoryBot.define do
@@ -270,7 +268,8 @@ end
 ```
 
 メモはプロジェクトとユーザーの両方に属しています。
-しかし、テストのたびにいちいち 手作業でプロジェクトとユーザーを作りたくありません。私たちが作りたいのはメモだけになります。
+しかし、テストのたびにいちいち手作業でプロジェクトとユーザーを作りたくありません。
+ここで作成したいのは、メモそのものだけです。
 
 ```rb:spec/models/note_spec.rb
 require 'rails_helper'
@@ -283,11 +282,11 @@ RSpec.describe Note, type: :model do
 end
 ```
 
-ここでは Factory Bot を 1 回しか呼んでいないにもかかわらず、テストの実行結果を見ると 必要なデータが全部作成されています。
+ここではFactoryBotを1回しか呼んでいないにもかかわらず、テストの実行結果を見ると必要なデータが全部作成されています。
 
 ```
 Note
-This note's project is #<Project id: 1, name: "Test Project 1",
+This　note's project is #<Project id: 1, name: "Test Project 1",
 description: "Sample project for testing purposes", due_on:
 "2017-01-17", created_at: "2017-01-10 04:01:24", updated_at:
 "2017-01-10 04:01:24", user_id: 1>
@@ -296,11 +295,24 @@ This note's user is #<User id: 2, email: "tester2@example.com", created_at: "201
 first_name: "Aaron", last_name: "Sumner">
 ```
 
-ですが、この例はファクトリで関連を扱う際の潜在的な落とし穴も示しています。ユーザーのメールアドレスをよく見てください。なぜ tester1@example.com ではなく、tester2@example.com になっているのでしょうか?この理由はメモのファクトリが 関連するプロジェクトを作成する際に関連するユーザー(プロジェクトに関連する owner) を作成し、それから 2 番目のユーザー(メモに関連するユーザー)を作成するからです。
-この問題を回避するためにメモのファクトリを次のように更新します。こうするとデフォ ルトでユーザーが 1 人しか作成されなくなります。
+ですが、この例はファクトリで関連を扱う際の落とし穴が潜んでいます。
+ユーザーのメールアドレスをよく見ると、tester1@example.comではなく、tester2@example.comになっています。
+この理由はメモのファクトリが関連するプロジェクトを作成する際に関連するユーザー(プロジェクトに関連するowner)を作成し、それから2番目のユーザー(メモに関連するユーザー)を作成するからです。
+
+:::details どのような順番で作成されているのか？
+
+1. note を作るには project が必要（association :project）
+2. project を作るには owner が必要（association :owner）
+3. owner は user ファクトリの alias により user として解決される → User① が生成される
+4. さらに note 自身が association :user を持っているため、もう1人のユーザー User② が新たに生成される
+   :::
+
+この問題を回避するためにメモのファクトリを次のように更新します。
+こうするとデフォルトでユーザーが1人しか作成されなくなります。
 
 ```rb:spec/factories/notes.rb
-FactoryBot.define do factory :note do
+FactoryBot.define do
+  factory :note do
     message { "My important note." }
     association :project
     user { project.owner }
@@ -308,7 +320,13 @@ FactoryBot.define do factory :note do
 end
 ```
 
-スペックの結果を見てもユーザーは 1 人だけになります。
+スペックの結果を見てもユーザー 1人だけになります。
+
+:::details どのような作成に変わったのか？
+
+1. projectを生成（owner: user）
+2. note.userにそのままproject.ownerを割り当てる
+   :::
 
 ```
 Note
@@ -321,9 +339,10 @@ me: "Sumner">
 ```
 
 今回のようなファクトリを使って、件数を扱う検証の場合は注意が必要になります。
-User ファクトリに追加した alias に戻ってみます。Project モデルを見 ると、User の関連は owner という名前になっているのがわかると思います。
+Userファクトリに追加したaliasに戻ってみます。
+Projectモデルを見ると、Userの関連はownerという名前になっているのがわかると思います。
 
-````rb:spec/factories/projects.rb
+```rb:spec/factories/projects.rb
 FactoryBot.define do
   factory :project do
     sequence(:name) { |n| "Project #{n}" }
@@ -332,23 +351,32 @@ FactoryBot.define do
     association :owner
   end
 end
+```
 
-このように Factory Bot を使う際はユーザーファクトリに対して owner という名前で参照さ れる場合があると伝えなくてはいけません。そのために使うのが alias です。
+このようにFactoryBotを使う際はユーザーファクトリに対してownerという名前で参照される場合があると伝えなくてはいけません。
+そのために使うのがaliasです。
 
 ### ファクトリ内の重複をなくす
-Factory Bot では同じ型を作成するファクトリを複数定義することもできます。たとえば、 スケジュールどおりのプロジェクトとスケジュールから遅れているプロジェクトをテストし たいのであれば、別々の名前を付けてプロジェクトファクトリの引数に渡すことができます。 その際はそのファクトリを使って作成するインスタンスのクラス名と、既存のファクトリと 異なるインスタンスの属性値(この例でいうと due_on 属性の値)も指定します。
+
+FactoryBotでは同じ型を作成するファクトリを複数定義することもできます。
+たとえば、スケジュールどおりのプロジェクトとスケジュールから遅れているプロジェクトをテストしたいのであれば、別々の名前を付けてプロジェクトファクトリの引数に渡すことができます。
+その際はそのファクトリを使って作成するインスタンスのクラス名と、既存のファクトリと異なるインスタンスの属性値(この例でいうとdue_on 属性の値)も指定します。
+また、`1.week.from_now`や`1.day.ago`は[ActiveSupport](https://api.rubyonrails.org/classes/ActiveSupport/Duration.html#method-i-ago)によって利用可能になっています。
 
 ```rb:spec/factories/projects.rb
 FactoryBot.define do
   factory :project do
-    sequence(:name) { |n| "Test Project #{n}" } description { "Sample project for testing purposes" } due_on { 1.week.from_now }
+    sequence(:name) { |n| "Test Project #{n}" }
+    description { "Sample project for testing purposes" }
+    due_on { 1.week.from_now }
     association :owner
   end
 
   # 昨日が締め切りのプロジェクト
   factory :project_due_yesterday, class: Project do
     sequence(:name) { |n| "Test Project #{n}" }
-    description { "Sample project for testing purposes" } due_on { 1.day.ago }
+    description { "Sample project for testing purposes" }
+    due_on { 1.day.ago }
     association :owner
   end
 
@@ -363,14 +391,25 @@ FactoryBot.define do
   # 明日が締め切りのプロジェクト
   factory :project_due_tomorrow, class: Project do
     sequence(:name) { |n| "Test Project #{n}" }
-    description { "Sample project for testing purposes" } due_on { 1.day.from_now }
+    description { "Sample project for testing purposes" }
+    due_on { 1.day.from_now }
     association :owner
   end
 end
-````
+```
 
-こうすると上で定義した新しいファクトリを Project モデルのスペックで使うことができ ます。
-be_late は RSpec に定義されている マッチャではありません。ですが RSpec は賢いので、project に late または late? という名前 の属性やメソッドが存在し、それが真偽値を返すようになっていれば be_late はメソッドや 属性の戻り値が true になっていることを検証してくれます。
+こうすると上で定義した新しいファクトリをProjectモデルのスペックで使うことができます。
+`be_late`はRSpecのマッチャではありません。
+[プレディケートマッチャ](https://rspec.info/features/3-13/rspec-expectations/built-in-matchers/predicates/)という仕組みを利用し、projectにlateまたはlate?という名前の属性やメソッドが存在し、それが真偽値を返すようになっていれば`be_late`はメソッドや属性の戻り値がtrueになっていることを検証してくれます。
+この仕組みのメリットとしては、expect(project).to be\*late という自然言語っぽい書き方ができたり、`be_〇〇`という形式で、メソッド名をテストコードに書かずに表現できることです。
+
+:::details このケースでの解釈のされ方
+`expect(project).to be_late`
+
+RSpec が内部的に下記のように解釈する
+
+`expect(project.late?).to be true`
+:::
 
 ```rb:spec/models/project_spec.rb
 # 遅延ステータス
@@ -395,8 +434,11 @@ describe "late status" do
 end
 ```
 
-ですが、新しく作ったファクトリには大量の重複があります。新しいファクトリを定義す るときは毎回プロジェクトの全属性を再定義しなければいけません。これはつまり、Project モデルの属性を変更したときは毎回複数のファクトリ定義を変更する必要が出てくる、とい うことを意味しています。
-Factory Bot には重複を減らすテクニックが二つあります。一つ目は ファクトリの継承 を使ってユニークな属性だけを変えることです。
+ですが、新しく作ったファクトリには大量の重複があります。
+新しいファクトリを定義するときは毎回プロジェクトの全属性を再定義しなければいけません。
+つまり、Projectモデルの属性を変更したときは毎回複数のファクトリ定義を変更する必要が出てくる、ということを意味しています。
+FactoryBotには重複を減らすテクニックが二つあります。
+一つ目はファクトリの継承を使ってユニークな属性だけを変えることです。
 
 ```rb:spec/factories/projects.rb
 FactoryBot.define do
@@ -424,17 +466,23 @@ FactoryBot.define do
 end
 ```
 
-見た目には少しわかりづらいかもしれませんが、これが継承の使い方です。:project*due*-yesterday と :project_due_today と :project_due_tomorrow の各ファクトリは継承元となる :project ファクトリの内部で入れ子になっています。構造だけを抜き出すと次のようになり ます。
+見た目には少しわかりづらいですが、これが継承の使い方になります。
+:project_due_yesterdayと:project_due_todayと:project_due_tomorrowの各ファクトリは継承元となる:projectファクトリの内部で入れ子になっています。
+構造だけを抜き出すと次のようになります。
 
 ```
 factory :project
-factory :project_due_yesterday
-factory :project_due_today
-factory :project_due_tomorrow
+  factory :project_due_yesterday
+  factory :project_due_today
+  factory :project_due_tomorrow
 ```
 
-継承を使うと class: Project の指定もなくすことができます。なぜならこの構造から Factory Bot は子ファクトリで Project クラスを使うことがわかるからです。この場合、スペッ ク側は何も変更しなくてもそのままでパスします。
-重複を減らすための二つ目のテクニックは トレイト(trait) を使ってテストデータを構築 することです。このアプローチでは属性値の 集合 をファクトリで定義します。まず、プロジ ェクトファクトリの中身を更新します。
+継承を使うとclass:Projectの指定もなくすことができます。
+なぜならこの構造からFactoryBotは子ファクトリでProjectクラスを使うことがわかるからです。
+この場合、スペック側は何も変更しなくてもそのままでパスします。
+重複を減らすための二つ目のテクニックはトレイト(trait)を使ってテストデータを構築することです。
+このアプローチでは属性値の集合をファクトリで定義します。
+まず、プロジェクトファクトリの中身を更新します。
 
 ```rb:spec/factories/projects.rb
 FactoryBot.define do
@@ -467,8 +515,8 @@ FactoryBot.define do
 end
 ```
 
-トレイトを使うためにはスペックを変更する必要があります。利用したいトレイトを使っ
-て次のようにファクトリから新しいプロジェクトを作成します。
+トレイトを使うためにはスペックを変更する必要があります。
+利用したいトレイトを使って次のようにファクトリから新しいプロジェクトを作成します。
 
 ```rb:spec/factories/projects.rb
 describe "late status" do
@@ -494,15 +542,20 @@ it "can have many notes" do
 end
 ```
 
-トレイトを使うことの利点は、複数のトレイトを組み合わせて複雑なオブジェクト を構築できる点です。
+トレイトを使うことの利点は、複数のトレイトを組み合わせて複雑なオブジェクトを構築でき、簡潔に書くことができる点です！
 私の会社でもトレイトを採用しています。
 
 ### コールバック
 
-コールバックを使うと、ファクトリがオブジェクトを create する前、もしくは create した後に何かしら追加のアクションを実行でき
-ます。また、create されたときだけでなく、build されたり、stub されたりしたときも同じように使えます。適切にコールバックを使えば複雑なテストシナリオも簡単にセットアップできるので、強力な時間の節約になります。ですが、一方でコールバックは遅いテストや無駄に複雑なテストの原因になることもあります。注意して使ってください。
+コールバックを使うと、ファクトリがオブジェクトをcreateする前、もしくはcreateした後に何かしら追加のアクションを実行できます。
+また、createされたときだけでなく、buildされたり、stubされたりしたときも同じように使えます。
+適切にコールバックを使えば複雑なテストシナリオも簡単にセットアップできます。
+しかし、一方でコールバックは遅いテストや無駄に複雑なテストの原因になることもありますので、注意して使ってください。
 
-ここでは複雑な関連を持つオブジェクトを作成する方法を説明します。Factory Bot にはこうした処理を簡単に行うための create_list メソッドが用意されています。コールバックを利用して、新しいオブジェクトが作成されたら自動的に複数のメモを作成する処理を追加してみましょう。今回は必要なときにだけコールバックを利用するよう、トレイトの中でコールバックを使います。
+ここでは複雑な関連を持つオブジェクトを作成する方法を説明します。
+FactoryBotにはこうした処理を簡単に行うためのcreate_listメソッドが用意されています。
+コールバックを利用して、新しいオブジェクトが作成されたら自動的に複数のメモを作成する処理を追加してみましょう。
+今回は必要なときにだけコールバックを利用するよう、トレイトの中でコールバックを使います。
 
 ```rb:spec/factories/projects.rb
 FactoryBot.define do
@@ -516,10 +569,15 @@ FactoryBot.define do
     trait :with_notes do
       after(:create) { |project| create_list(:note, 5, project: project) }
     end
+  end
+end
 ```
 
-create_list メソッドではモデルを作成するために関連するモデルが必要です。今回はメモの作成に必要な Project モデルを使っています。
-プロジェクトファクトリに新しく定義した with_notes トレイトは、新しいプロジェクトを作成した後にメモファクトリを使って 5 つの新しいメモを追加します。それではスペック内でこのトレイトを使う方法を見てみましょう。最初はトレイトなしのファクトリを使ってみます。
+create_listメソッドではモデルを作成するために関連するモデルが必要です。
+今回はメモの作成に必要なProjectモデルを使っています。
+プロジェクトファクトリに新しく定義したwith_notesトレイトは、新しいプロジェクトを作成した後にメモファクトリを使って5つの新しいメモを追加します。
+それではスペック内でこのトレイトを使う方法を見てみましょう。
+最初はトレイトなしのファクトリを使ってみます。
 
 ```rb:spec/models/project_spec.rb
 # たくさんのメモが付いていること
@@ -529,7 +587,9 @@ it "can have many notes" do
 end
 ```
 
-このテストは失敗します。なぜならメモの数が 5 件ではなくゼロだからです。
+このテストは失敗します。
+メモの数が5件ではなく0件という結果になります。
+理由は、:with_notesトレイトを使っていないため、after(:create)で定義したcreate_list(:note, 5 ,project:project)が呼び出されていないからです。
 
 ```
 Failures:
@@ -546,7 +606,7 @@ Failures:
   # 以下略
 ```
 
-そこで with_notes トレイトでセットアップした新しいコールバックを使って、このテストをパスさせましょう。
+そこで with_notes トレイトでセットアップした新しいコールバックを使って、このテストをパスさせてみます。
 
 ```rb:spec/models/project_spec.rb
 # たくさんのメモが付いていること
@@ -556,15 +616,17 @@ it "can have many notes" do
 end
 ```
 
-これでテストがパスします。なぜなら、コールバックによってプロジェクトに関連する 5 つのメモが作成されるからです。実際のアプリケーションでこういう仕組みを使っていると、ちょっと情報量の乏しいテストに見えるかもしれません。ですが、今回の使用例はコールバックが正しく設定されているか確認するのに役立ちます。
-とくに、Rails のモデルが入れ子になった他のモデルを属性として持っている場合、コールバックはそうしたモデルのテストデータを作るのに便利です
+これでテストがパスします。
+コールバックによってプロジェクトに関連する5つのメモが作成することができました。
+FactoryBotはトレイトを明示的に指定しない限り実行しません。
+with_notesはオプションであり、明示的に指定されたときだけafter(:create)が走ります。
 
 ## スペックを Dry に保つ
 
 ### let で遅延読み込みする
 
-`spec/models/note_spec.rb`を対象に既存の before ブロックの実装から let メソッドに変えた時の挙動について解説します。
-こうすることで Factorybot の一部のセットするデータを一部書き換えることもできます。
+`spec/models/note_spec.rb`を対象に既存のbeforeブロックの実装からletメソッドに変えた時の挙動について解説します。
+こうすることでFactoryBotの一部のセットするデータを一部書き換えることもできます。
 
 `before ブロックの場合`
 
@@ -632,13 +694,18 @@ end
 
 ```
 
-before ブロックを使うと describe や context ブロックの内部で、各テストの実行前に共通のインスタンス変数をセットアップできます。
+beforeブロックを使うとdescribeやcontextブロックの内部で、各テストの実行前に共通のインスタンス変数をセットアップできます。
+この方法にも利点はありますが、いくつかの課題が残ります
+全体のbeforeブロックはRSpec.describeNoteの直下にあるため、このブロックの中身はこのファイル内のすべてのitに対して毎回実行されます。
+またdescribeの中のbeforeブロックはその中の context ブロック内の各テスト実行前に、毎回実行されます。
 
-この方法も悪くはないのですが、まだ解決できていない問題が二つあります。
+これら before ブロックの中で定義された create や project.notes.create(...) のような処理は、該当する it ブロックが実行されるたびに毎回評価されてデータベースに書き込まれるということです。
 
-第一に、before の中に書いたコードは describe や context の内部に書いたテストを実行するたびに毎回実行されます。これはテストに予期しない影響を及ぼす恐れがあります。また、そうした問題が起きない場合でも、使う必要のないデータを作成してテストを遅くする原因になることもあります。
+そのため下記のような影響が生まれます。
 
-第二に、要件が増えるにつれてテストの可読性を悪くします。
+- 不要なテストでも重いデータを毎回用意してしまい無駄になる
+- テストが遅くなる
+- テスト結果が依存して壊れやすくなる
 
 `letメソッドを使用した場合`
 
@@ -708,23 +775,19 @@ end
 
 ```
 
-let は呼ばれて、初めて使われた時に実行されるメソッドです。
-
-let を使うことで、before ブロックに処理を詰め込まず、必要なデータを必要なテストの中だけで呼び出せるので、テストの読みやすさ・メンテナンス性が上がります。
-
+letは呼ばれて、初めて使われた時に実行されるメソッドです。
+letを使うことで、beforeブロックに処理を詰め込まず、必要なデータを必要なテストの中だけで呼び出せるので、テストの読みやすさ・メンテナンス性が上がります。
 `user: user`で`let(:user)`を呼び出し、`user`の作成を行います。
-
-` "is valid with a user, project, and message"`のテストが終わると、let で作成された値は、それぞれの it ブロックごとにスコープがリセットされます。したがって、ある it で作成された user は、他の it には影響を与えません
-
-つまり、「let は呼ばれたときに初めて評価される（遅延評価される）」ため。let(:user) は user が実際に参照されるまで評価されない。
-
-「テスト実行時に必要なときだけ呼び出されることで、無駄な DB アクセスが避けられる」ため、パフォーマンスと可読性が向上するといったメリットがあります。
+` "is valid with a user, project, and message"`のテストが終わると、letで作成された値は、それぞれのitブロックごとにスコープがリセットされます。
+したがって、あるitで作成されたuserは、他のitには影響を与えません
+つまり、「letは呼ばれたときに初めて評価される（遅延評価される）」ため。let(:user)はuserが実際に参照されるまで評価されない。
+「テスト実行時に必要なときだけ呼び出されることで、無駄なDBアクセスが避けられる」ため、パフォーマンスと可読性が向上するといったメリットがあります。
 
 ### let!か before をちらを使うべきか
 
-let は遅延評価を行うが、let!か before は即時評価を行います。
+letは遅延評価を行うが、let!かbeforeは即時評価を行います。
 即時評価は、テスト実行前にその場ですぐ実行されるメソッドになります。
-私の場合は可読性やデバッグのしやすさから実行順が明確な before を使うようにしています。
+私の場合は可読性やデバッグのしやすさから実行順が明確なbeforeを使うようにしています。
 以下を例に解説します。
 
 `let!の場合`
@@ -735,7 +798,7 @@ let!(:post) { create(:post, user:) }
 let!(:comment) { create(:comment, post:) }
 ```
 
-一見上から順に実行されそうに見えますが、実際の評価タイミングは RSpec 内部の定義処理順に依存していて、いつ実行されたかは見た目では判断できない。
+一見上から順に実行されそうに見えますが、実際の評価タイミングはRSpec内部の定義処理順に依存していて、いつ実行されたかは見た目では判断できない。
 つまり、見た目の順序と実行順が一致しない可能性がある。
 
 `beforeの場合`
@@ -748,12 +811,12 @@ before do
 end
 ```
 
-1. user を作って
-2. user を使って post を作って
-3. post を使って comment を作る
+1. userを作って
+2. userを使ってpostを作って
+3. postを使ってcommentを作る
 
 という 処理の流れがそのままコードの見た目通り。
-読む人が上から順にこうやって処理されるんだなとすぐ理解できます。
+読者が処理の流れを視覚的に理解しやすくなります。
 つまり、見た目の順序と実行順が一致する。
 
 ## さいごに
