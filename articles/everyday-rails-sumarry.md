@@ -1,5 +1,5 @@
 ---
-title: "Everyday Railsのエッセンス凝縮！RailsのRSpecモデルテスト入門"
+title: "Everyday Railsのエッセンス凝縮！最速で理解するRSpecモデルテスト"
 emoji: "🧪"
 type: "tech"
 topics: ["rspec", "test", "ruby", "rails"]
@@ -8,12 +8,12 @@ published: true
 
 ## はじめに
 
-RSpec を体系的に学ぶために[Everyday Rails - RSpec による Rails テスト入門](https://leanpub.com/everydayrailsrspec-jp)の書籍から業務で使用している項目を抜粋してまとめた記事になります。
+RSpec を体系的に学ぶために、[Everyday Rails - RSpec による Rails テスト入門](https://leanpub.com/everydayrailsrspec-jp)から、業務で使用している項目を抜粋してまとめた記事です。
 
-私の会社では[GraphQL Ruby](https://graphql-ruby.org/)を採用しているため、この記事ではモデルスペックを中心に取り上げ、以下のような理由からコントローラーや API、システムスペックについての解説は割愛しています。
+私の会社では[GraphQL Ruby](https://graphql-ruby.org/)を採用しているため、この記事ではモデルスペックを中心に取り上げます。そのため、以下のような理由からコントローラーや API、システムスペックについての解説は割愛しています。
 
-- GraphQL では GraphqlController のみを使用しており、一般的なコントローラーは存在しないため、テスト対象外としています。
-- エンドポイントが 1 つ（/graphql）に集約されるため、REST API のようなリクエストスペックは対象外としています。
+- GraphQL では `GraphqlController ` のみを使用しており、一般的なコントローラーは存在しないため、テスト対象外としています。
+- エンドポイントが `/graphql `の 1 つに集約されるため、REST API におけるリクエストスペックも対象外としています。
 
 ## 対象読者
 
@@ -26,33 +26,34 @@ RSpec を体系的に学ぶために[Everyday Rails - RSpec による Rails テ�
 
 ### バリデーションテスト
 
-```
-RSpec.describe User, type: :model do
-    # 姓、名、メール、パスワードがあれば有効な状態であること
-    it "is valid with a first name, last name, email, and password" do
-        user = User.new(
-        first_name: "Aaron",
-        last_name:  "Sumner",
-        email:      "tester@example.com",
-        password:   "dottle-nouveau-pavilion-tights-furze",
-    )
-    expect(user).to be_valid
+```rb:spec/models/user_spec.rb
+RSpec.describe User, type: :model do # 姓、名、メール、パスワードがあれば有効な状態であること
+it "is valid with a first name, last name, email, and password" do
+  user = User.new(
+    first_name: "Aaron",
+    last_name: "Sumner",
+    email: "tester@example.com",
+    password: "dottle-nouveau-pavilion-tights-furze",
+  )
+  expect(user).to be_valid
 end
 ```
 
 - このケースでは be_valid という RSpec のマッチャを使って、モデルが有効な状態かどうかを検証しています。
 - true もしくは false になることを検証し、今回は戻り値が true になることを期待しています。
 - User モデルに定義されているバリデーションが、全て満たされているため、テストはパスします。
-  :::details マッチャ
-  「期待値と実際の値を比較して、一致した（もしくは一致しなかった）という結果を返すオブジェクト」のこと
-  :::
 
-```
+:::details マッチャ
+「期待値と実際の値を比較して、一致した（もしくは一致しなかった）という結果を返すオブジェクト」のこと
+:::
+
 # 名がなければ無効な状態であること
+
+```rb:spec/models/user_spec.rb
 it "is invalid without a first name" do
-user = User.new(first_name: nil)
-user.valid?
-expect(user.errors[:first_name]).to include("can't be blank")
+  user = User.new(first_name: nil)
+  user.valid?
+  expect(user.errors[:first_name]).to include("can't be blank")
 end
 ```
 
@@ -73,28 +74,28 @@ end
 
 ### build と create の違い
 
-```
+```rb:spec/models/project_spec.rb
 RSpec.describe Project, type: :model do
 # ユーザー単位では重複したプロジェクト名を許可しないこと
   it "does not allow duplicate project names per user" do
     user = User.create(
-      first_name: "Joe",
-      last_name:  "Tester",
-      email:      "joetester@example.com",
-      password:   "dottle-nouveau-pavilion-tights-furze",
-    )
+    first_name: "Joe",
+    last_name: "Tester",
+    email: "joetester@example.com",
+    password: "dottle-nouveau-pavilion-tights-furze",
+  )
 
-    user.projects.create(
-      name: "Test Project",
-    )
+  user.projects.create(
+    name: "Test Project",
+  )
 
-    new_project = user.projects.build(
-      name: "Test Project",
-    )
+  new_project = user.projects.build(
+    name: "Test Project",
+  )
 
-    new_project.valid?
-    expect(new_project.errors[:name]).to include("has already been taken")
-  end
+  new_project.valid?
+  expect(new_project.errors[:name]).to include("has already been taken")
+end
 ```
 
 ここでテストしたいのは、 一人のユーザーは同じ名前で二つのプロジェクトを作成できないが、ユーザーが異なるとき は同じ名前のプロジェクトを作成できる、という要件です。
@@ -133,15 +134,16 @@ RSpec.describe Project, type: :model do
 FactoryBot は、テスト用のダミーデータ（テストデータ）を簡単に作成するためのライブラリです。
 Rails アプリの User などのモデルを、テストごとにサクッと作れるようになります。
 
-```
+```rb:spec/factories/users.rb
 FactoryBot.define do
- factory :user do
+  factory :user do
     first_name { "Aaron" }
-    last_name  { "Sumner" }
+    last_name { "Sumner" }
     email { "tester@example.com" }
     password { "dottle-nouveau-pavilion-tights-furze" }
- end
+  end
 end
+
 ```
 
 このように User の FactoryBot を追加することで、テスト内で FactoryBot.create(:user) と書くだけで、簡単に新しいユーザー を作成できるようになります。
@@ -150,9 +152,9 @@ end
 
 `Factorybotを使った場合`
 
-```
+```rb:spec/models/user_spec.rb
 it "has a valid factory" do
- expect(FactoryBot.build(:user)).to be_valid
+  expect(FactoryBot.build(:user)).to be_valid
 end
 ```
 
@@ -162,24 +164,27 @@ end
 it "is valid with a first name, last name, email, and password" do
   user = User.new(
     first_name: "Aaron",
-    last_name:  "Sumner",
-    email:      "tester@example.com",
-    password:   "dottle-nouveau-pavilion-tights-furze",
-)
+    last_name: "Sumner",
+    email: "tester@example.com",
+    password: "dottle-nouveau-pavilion-tights-furze",
+  )
 expect(user).to be_valid end
+
 ```
 
-Factorybot を使った場合と使わない場合を実際に見比べてみることで、りファクトリ版の方がより簡潔になっていることがわかると思います。
+Factorybot を使った場合と使わない場合を実際に見比べてみることで、ファクトリ版の方がより簡潔になっていることがわかると思います。
 
 ### 属性をオーバーライドする
 
-```
+```rb:spec/models/user_spec.rb
 # 名がなければ無効な状態であること
+
 it "is invalid without a first name" do
- user = FactoryBot.build(:user, first_name: nil)
- user.valid?
- expect(user.errors[:first_name]).to include("can't be blank")
+  user = FactoryBot.build(:user, first_name: nil)
+  user.valid?
+  expect(user.errors[:first_name]).to include("can't be blank")
 end
+
 ```
 
 ここでは Factorybot で定義してある`first_name: "Aaron"`を`first_name: nil`と指定して、オーバーライドしています。
@@ -190,25 +195,28 @@ end
 たとえば以下のような場合です。
 
 ```
+
 # 複数のユーザーで何かする
 it "does something with multiple users" do
-user1 = FactoryBot.create(:user) user2 = FactoryBot.create(:user) expect(true).to be_truthy
+  user1 = FactoryBot.create(:user) user2 = FactoryBot.create(:user) expect(true).to be_truthy
 end
+
 ```
 
 すると次のようなバリデーションエラーが発生します。
 
 ```
 Failures:
-  1) User does something with multiple users
-     Failure/Error: user2 = FactoryBot.create(:user)
-     ActiveRecord::RecordInvalid:
-       Validation failed: Email has already been taken
+1. User does something with multiple users
+   Failure/Error: user2 = FactoryBot.create(:user)
+
+   ActiveRecord::RecordInvalid:
+    Validation failed: Email has already been taken
 ```
 
 Factory Bot では シーケンス を使ってこのようなユニークバリデーションを持つフィール ドを扱うことができます。シーケンスはファクトリから新しいオブジェクトを作成するたび に、カウンタの値を 1 つずつ増やしながら、ユニークにならなければいけない属性に値を設 定します。ファクトリ内にシーケンスを作成して実際に使ってみます。
 
-```
+```rb:spec/factories/users.rb
 FactoryBot.define do
   factory :user do
     first_name { "Aaron" }
@@ -489,6 +497,68 @@ end
 トレイトを使うことの利点は、複数のトレイトを組み合わせて複雑なオブジェクト を構築できる点です。
 私の会社でもトレイトを採用しています。
 
+### コールバック
+
+コールバックを使うと、ファクトリがオブジェクトを create する前、もしくは create した後に何かしら追加のアクションを実行でき
+ます。また、create されたときだけでなく、build されたり、stub されたりしたときも同じように使えます。適切にコールバックを使えば複雑なテストシナリオも簡単にセットアップできるので、強力な時間の節約になります。ですが、一方でコールバックは遅いテストや無駄に複雑なテストの原因になることもあります。注意して使ってください。
+
+ここでは複雑な関連を持つオブジェクトを作成する方法を説明します。Factory Bot にはこうした処理を簡単に行うための create_list メソッドが用意されています。コールバックを利用して、新しいオブジェクトが作成されたら自動的に複数のメモを作成する処理を追加してみましょう。今回は必要なときにだけコールバックを利用するよう、トレイトの中でコールバックを使います。
+
+```rb:spec/factories/projects.rb
+FactoryBot.define do
+  factory :project do
+    sequence(:name) { |n| "Test Project #{n}" }
+    description { "Sample project for testing purposes" }
+    due_on { 1.week.from_now }
+    association :owner
+
+    # メモ付きのプロジェクト
+    trait :with_notes do
+      after(:create) { |project| create_list(:note, 5, project: project) }
+    end
+```
+
+create_list メソッドではモデルを作成するために関連するモデルが必要です。今回はメモの作成に必要な Project モデルを使っています。
+プロジェクトファクトリに新しく定義した with_notes トレイトは、新しいプロジェクトを作成した後にメモファクトリを使って 5 つの新しいメモを追加します。それではスペック内でこのトレイトを使う方法を見てみましょう。最初はトレイトなしのファクトリを使ってみます。
+
+```rb:spec/models/project_spec.rb
+# たくさんのメモが付いていること
+it "can have many notes" do
+  project = FactoryBot.create(:project)
+  expect(project.notes.length).to eq 5
+end
+```
+
+このテストは失敗します。なぜならメモの数が 5 件ではなくゼロだからです。
+
+```
+Failures:
+
+1) Project can have many notes
+  Failure/Error: expect(project.notes.length).to eq 5
+
+  expected: 5
+       got: 0
+
+  (compared using ==)
+  # ./spec/models/project_spec.rb:69:in `block (2 levels) in <top
+  (required)>'
+  # 以下略
+```
+
+そこで with_notes トレイトでセットアップした新しいコールバックを使って、このテストをパスさせましょう。
+
+```rb:spec/models/project_spec.rb
+# たくさんのメモが付いていること
+it "can have many notes" do
+  project = FactoryBot.create(:project, :with_notes)
+  expect(project.notes.length).to eq 5
+end
+```
+
+これでテストがパスします。なぜなら、コールバックによってプロジェクトに関連する 5 つのメモが作成されるからです。実際のアプリケーションでこういう仕組みを使っていると、ちょっと情報量の乏しいテストに見えるかもしれません。ですが、今回の使用例はコールバックが正しく設定されているか確認するのに役立ちます。
+とくに、Rails のモデルが入れ子になった他のモデルを属性として持っている場合、コールバックはそうしたモデルのテストデータを作るのに便利です
+
 ## スペックを Dry に保つ
 
 ### let で遅延読み込みする
@@ -498,55 +568,53 @@ end
 
 `before ブロックの場合`
 
-```
-
+```rb:spec/models/task_spec.rb
 require 'rails_helper'
 
 RSpec.describe Note, type: :model do
-before do
-@user = User.create(
-first_name: "Joe",
-last_name: "Tester",
-email: "joetester@example.com",
-password: "dottle-nouveau-pavilion-tights-furze",
-)
+  before do
+    @user = User.create(
+      first_name: "Joe",
+      last_name: "Tester",
+      email: "joetester@example.com",
+      password: "dottle-nouveau-pavilion-tights-furze",
+    )
 
     @project = @user.projects.create(
       name: "Test Project",
     )
+  end
 
-end
+  it "is valid with a user, project, and message" do
+    note = Note.new(
+      message: "This is a sample note.",
+      user: @user,
+      project: @project,
+    )
+    expect(note).to be_valid
+  end
 
-it "is valid with a user, project, and message" do
-note = Note.new(
-message: "This is a sample note.",
-user: @user,
-project: @project,
-)
-expect(note).to be_valid
-end
+  it "is invalid without a message" do
+    note = Note.new(message: nil)
+    note.valid?
+    expect(note.errors[:message]).to include("can't be blank")
+  end
 
-it "is invalid without a message" do
-note = Note.new(message: nil)
-note.valid?
-expect(note.errors[:message]).to include("can't be blank")
-end
-
-describe "search message for a term" do
-before do
-@note1 = @project.notes.create(
-message: "This is the first note.",
-user: @user,
-)
-@note2 = @project.notes.create(
-message: "This is the second note.",
-user: @user,
-)
-@note3 = @project.notes.create(
-message: "First, preheat the oven.",
-user: @user,
-)
-end
+  describe "search message for a term" do
+    before do
+      @note1 = @project.notes.create(
+        message: "This is the first note.",
+        user: @user,
+      )
+      @note2 = @project.notes.create(
+        message: "This is the second note.",
+        user: @user,
+      )
+      @note3 = @project.notes.create(
+        message: "First, preheat the oven.",
+        user: @user,
+      )
+    end
 
     context "when a match is found" do
       it "returns notes that match the search term" do
@@ -559,8 +627,7 @@ end
         expect(Note.search("message")).to be_empty
       end
     end
-
-end
+  end
 end
 
 ```
@@ -575,37 +642,37 @@ before ブロックを使うと describe や context ブロックの内部で、
 
 `letメソッドを使用した場合`
 
-```
+```rb:spec/models/note_spec.rb
 
 require 'rails_helper'
 
 RSpec.describe Note, type: :model do
-let(:user) { FactoryBot.create(:user) }
-let(:project) { FactoryBot.create(:project, owner: user) }
+  let(:user) { FactoryBot.create(:user) }
+  let(:project) { FactoryBot.create(:project, owner: user) }
 
-it "is valid with a user, project, and message" do
-note = Note.new(
-message: "This is a sample note.",
-user: user,
-project: project,
-)
-expect(note).to be_valid
-end
+  it "is valid with a user, project, and message" do
+    note = Note.new(
+      message: "This is a sample note.",
+      user: user,
+      project: project,
+    )
+    expect(note).to be_valid
+  end
 
-it "is invalid without a message" do
-note = Note.new(message: nil)
-note.valid?
-expect(note.errors[:message]).to include("can't be blank")
-end
+  it "is invalid without a message" do
+    note = Note.new(message: nil)
+    note.valid?
+    expect(note.errors[:message]).to include("can't be blank")
+  end
 
-describe "search message for a term" do
-let!(:note1) {
-FactoryBot.create(:note,
-project: project,
-user: user,
-message: "This is the first note.",
-)
-}
+  describe "search message for a term" do
+    let!(:note1) {
+      FactoryBot.create(:note,
+        project: project,
+        user: user,
+        message: "This is the first note.",
+      )
+    }
 
     let!(:note2) {
       FactoryBot.create(:note,
@@ -636,8 +703,7 @@ message: "This is the first note.",
         expect(Note.count).to eq 3
       end
     end
-
-end
+  end
 end
 
 ```
@@ -664,11 +730,9 @@ let は遅延評価を行うが、let!か before は即時評価を行います�
 `let!の場合`
 
 ```
-
 let!(:user) { create(:user) }
 let!(:post) { create(:post, user:) }
 let!(:comment) { create(:comment, post:) }
-
 ```
 
 一見上から順に実行されそうに見えますが、実際の評価タイミングは RSpec 内部の定義処理順に依存していて、いつ実行されたかは見た目では判断できない。
@@ -677,13 +741,11 @@ let!(:comment) { create(:comment, post:) }
 `beforeの場合`
 
 ```
-
 before do
-user = create(:user)
-post = create(:post, user: user)
-comment = create(:comment, post: post)
+  user = create(:user)
+  post = create(:post, user: user)
+  comment = create(:comment, post: post)
 end
-
 ```
 
 1. user を作って
@@ -696,9 +758,13 @@ end
 
 ## さいごに
 
-私の所属している会社では、基本的なルールとして[RuboCop RSpec ](https://docs.rubocop.org/rubocop-rspec/cops_rspec.html)のデフォルトルールに則るという方針を元に Rspec を書いています。
-その他にも外部 API の呼び出しをモックする場合は、基本的に[WebMock](https://github.com/bblimke/webmock)を使ったりしています。
+今回は、実務に直結する RSpec のモデルテストについて効率的に学べる方法をご紹介しました。
 
-```
+私自身、テストケースを洗い出すときには[マインドマップから始めるソフトウェアテスト](https://www.amazon.co.jp/%E3%83%9E%E3%82%A4%E3%83%B3%E3%83%89%E3%83%9E%E3%83%83%E3%83%97%E3%81%8B%E3%82%89%E5%A7%8B%E3%82%81%E3%82%8B%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2%E3%83%86%E3%82%B9%E3%83%88-%E6%B1%A0%E7%94%B0-%E6%9A%81/dp/4774131318)という書籍の考え方をベースに、マインドマップを使って思考を整理しています。ツールとしては、シンプルで使いやすい[MindMeiste](https://mindmeister.jp/)を愛用しています。
 
-```
+また、私の所属している会社では[RuboCop RSpec ](https://docs.rubocop.org/rubocop-rspec/cops_rspec.html)のデフォルトルールに沿って記述する方針を採用しており、外部 API のモックには[WebMock](https://github.com/bblimke/webmock)を利用しています。
+
+とはいえ、最も重要なのは「とにかく書いてみること」です。繰り返し書いていくことで、だんだんと感覚が身についていきます。
+本記事が、その第一歩の手助けになれば幸いです。
+
+最後まで読んでいただき、ありがとうございました！
