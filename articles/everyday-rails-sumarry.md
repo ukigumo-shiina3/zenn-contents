@@ -168,7 +168,8 @@ it "is valid with a first name, last name, email, and password" do
     email: "tester@example.com",
     password: "dottle-nouveau-pavilion-tights-furze",
   )
-expect(user).to be_valid end
+  expect(user).to be_valid
+end
 
 ```
 
@@ -743,8 +744,8 @@ let!(:comment) { create(:comment, post:) }
 ```
 before do
   user = create(:user)
-  post = create(:post, user: user)
-  comment = create(:comment, post: post)
+  post = create(:post, user:)
+  comment = create(:comment, post:)
 end
 ```
 
