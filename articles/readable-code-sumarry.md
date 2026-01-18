@@ -3,14 +3,7 @@ title: "『読む人の脳に優しいコード』とは何か？リーダブル
 emoji: "📘"
 type: "tech"
 topics:
-  [
-    "frontend",
-    "技術書",
-    "エンジニア",
-    "リーダブルコード",
-    "コードレビュー",
-    "コーディング",
-  ]
+  ["frontend", "技術書", "リーダブルコード", "コードレビュー", "コーディング"]
 published: false
 ---
 
@@ -25,3 +18,44 @@ published: false
 
 - コード品質を向上させたい方
 - リーダブルコードを読んでない方もしくは読み直したい方
+
+## 命名
+
+わかりやすい命名とは、「名前を見ただけで何を表しているかわかる」こと。
+
+### 情報量が不足している例
+
+```
+a = User.find(id)
+foo = CSV.read(csv_path, headers: true)
+
+user = User.find(id)
+data = CSV.read(csv_path, headers: true)
+```
+
+- `a`, `foo`
+  → 情報がゼロ
+- `user`, `data`
+  → 抽象的すぎて文脈に依存する
+
+### 何が問題か
+
+- 何のユーザーか分からない
+- 何の結果なのか分からない
+- 読み手が毎回文脈を補完する必要がある
+
+### 改善例
+
+```
+firebase_user = Firebase::User.find(id)
+csv_data = CSV.read(csv_path, headers: true)
+```
+
+名前に情報を含めることで、
+「何を表す変数なのか」を考えるコストが消える。
+
+### ポイント
+
+- 短さより情報量
+- 抽象名（user, data）は基本避ける
+- 取得元・役割・状態を名前に含める
