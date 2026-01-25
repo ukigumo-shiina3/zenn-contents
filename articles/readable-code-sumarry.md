@@ -26,10 +26,10 @@ published: false
 **[情報量が不足している例]**
 
 ```
-a = User.find(id)
+a = Firebase::User.find(id)
 foo = CSV.read(csv_path, headers: true)
 
-user = User.find(id)
+user = Firebase::User.find(id)
 data = CSV.read(csv_path, headers: true)
 ```
 
