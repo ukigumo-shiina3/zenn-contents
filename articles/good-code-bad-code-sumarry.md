@@ -347,3 +347,150 @@ end
 case文の重複コードが存在している場合は、**単一責任選択の原則**の考え方が重要です。
 この原則は端的に言うと、同じ条件式の条件式を書かず、一箇所にまとめようとする原則です。
 この原則に従って修正すると魔法の仕様が1箇所にまとまり、可読性も向上します。
+
+## コレクション
+```
+members.each do |member|
+  if member.hit_point > 0
+    if member.contains_state?(StateType::POISON)
+      member.hit_point -= 10
+
+      if member.hit_point <= 0
+        member.hit_point = 0
+        member.add_state(StateType::DEAD)
+        member.remove_state(StateType::POISON)
+      end
+    end
+  end
+end
+```
+
+コレクションとは、複数のデータ（要素）をまとめて扱うためのデータ構造の総称になります。
+今回のコレクション操作はmembersになります。
+これもif文のネストが深く見通しが悪くなっています。
+
+```
+members.each do |member|
+  next if member.hit_point == 0
+  next unless member.contains_state?(StateType::POISON)
+
+  member.hit_point -= 10
+
+  next if member.hit_point > 0
+
+  member.hit_point = 0
+  member.add_state(StateType::DEAD)
+  member.remove_state(StateType::POISON)
+end
+```
+
+今回はループの中の処理になるので、next ifを使って早期リターンをする事で、ネストの解消を行うことで、可読性が向上します。
+
+## 密結合
+結合度とは、「モジュール間の依存の度合いを表す指標」です。
+凝集度と同様に、モジュールの粒度をクラスとします。
+また密結合とは、「あるクラスが、他の多くのクラスに依存」していることです。
+結合度の低い、疎結合な構造へ改善すると、コードの変更が楽になります。
+
+### 継承より委譲
+
+下記のような継承は一見良さそうに見えます。
+
+```
+class PhysicalAttack
+  # 単体攻撃
+  def single_attack
+    10
+  end
+
+  # 2回攻撃
+  def double_attack
+    20
+  end
+end
+
+
+# 武闘家クラス それぞれの攻撃に少しダメージを上乗せする
+class FighterPhysicalAttack < PhysicalAttack
+  # オーバーライド
+  def single_attack
+    super + 20
+  end
+
+  def double_attack
+    super + 20
+  end
+end
+
+fighter_physical_attack = FighterPhysicalAttack.new
+puts fighter_physical_attack.single_attack  # 30
+puts fighter_physical_attack.double_attack  # 40
+```
+
+PhysicalAttack.doubleAttackのロジックがsingleAttackを2回実行する修正が行われると意図していない動作になる
+
+```
+class PhysicalAttack
+  # 単体攻撃
+  def single_attack
+    10
+  end
+
+  # 2回攻撃
+  def double_attack
+    single_attack + single_attack
+  end
+end
+
+# 武闘家クラス
+class FighterPhysicalAttack < PhysicalAttack
+  def single_attack
+    super + 20
+  end
+end
+
+fighter_physical_attack = FighterPhysicalAttack.new
+
+puts fighter_physical_attack.single_attack  # 30
+puts fighter_physical_attack.double_attack  # 60（意図しない結果になる例）
+```
+
+このように継承関係にあるクラスはサブクラスがスーパークラスの構造にひどく依存してしまう（スーパークラス依存）
+
+```
+class PhysicalAttack
+  def single_attack
+    10
+  end
+
+  def double_attack
+    single_attack + single_attack
+  end
+end
+
+# コンポジション版
+class FighterPhysicalAttack
+  def initialize
+    @physical_attack = PhysicalAttack.new
+  end
+
+  def single_attack
+    @physical_attack.single_attack + 20
+  end
+
+  def double_attack
+    @physical_attack.double_attack + 20
+  end
+end
+
+fighter_physical_attack = FighterPhysicalAttack.new
+
+puts fighter_physical_attack.single_attack  # 30
+puts fighter_physical_attack.double_attack  # 40
+```
+
+
+スーパークラス依存による密結合を避けるため、継承より委譲が推奨されます。
+委譲とはコンポジション構造にすることです。
+委譲（コンポジション構造）にすることで
+スーパークラスではなくインスタンス変数として呼び出すことで意図しない結果をうまないようにすることができます。
