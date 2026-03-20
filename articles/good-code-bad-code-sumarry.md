@@ -494,3 +494,236 @@ puts fighter_physical_attack.double_attack  # 40
 委譲とはコンポジション構造にすることです。
 委譲（コンポジション構造）にすることで
 スーパークラスではなくインスタンス変数として呼び出すことで意図しない結果をうまないようにすることができます。
+
+## 設計の健全性
+### マジックナンバー
+
+```
+class ComicManager
+  attr_accessor :value
+
+  def initialize(value)
+    @value = value
+  end
+
+  def is_ok?
+    60 <= @value
+  end
+
+  def try_consume
+    tmp = @value - 60
+    raise RuntimeError if tmp < 0
+    @value = tmp
+  end
+end
+```
+
+60という数字が何を表しているのかわからない。
+実はこの60という数字は、コミックをお試しで購読するときに消費するポイントを表しています。
+is_okメソッドは、お試し購読可能かどうかを返すメソッドで、
+try_consumeメソッドは、お試し購読により購読消費するメソッドです。
+ここまで、説明しないと、60の意図が見えてきません。
+このようにロジック内に直接書き込まれている意図不明な値を**マジックナンバー**と呼びます。
+
+```
+class ComicManager
+  TRIAL_READING_POINT = 60
+
+  attr_accessor :value
+
+  def initialize(value)
+    @value = value
+  end
+
+  def ok?
+    TRIAL_READING_POINT <= @value
+  end
+
+  def try_consume
+    raise RuntimeError if @value < TRIAL_READING_POINT
+    @value -= TRIAL_READING_POINT
+  end
+end
+```
+
+マジックナンバーを書かないようにするには、定数として定義する。
+お試し購読の消費ポイントを**TRIAL_READING_POINT**として定義します。
+定数として定義することで、お試し購読の消費ポイントに仕様が変更されても、**TRIAL_READING_POINT**のみ値を変更すれば良くなりました。
+
+### null問題
+
+```
+class Member
+  attr_accessor :head, :body, :arm
+  attr_reader :defence
+
+  def initialize(defence, head: nil, body: nil, arm: nil)
+    @defence = defence
+    @head = head
+    @body = body
+    @arm = arm
+  end
+
+  # 防具の防御力を加味した総合防御力を返す
+  def total_defence
+    total = @defence
+
+    total += @head.defence if @head
+    total += @body.defence if @body
+    total += @arm.defence if @arm
+
+    total
+  end
+
+  # 全ての防具を外す
+  def take_off_all_equipments
+    @head = nil
+    @body = nil
+    @arm = nil
+  end
+end
+```
+
+nullが入り込む前提でロジックを組むと、いたるところでnullチェックをしなければなりません。
+nullチェックが漏れるとバグに繋がります。
+
+```
+class Equipment
+  attr_reader :name, :price, :defence, :magic_defence
+
+  EMPTY = new("装備なし", 0, 0, 0)
+
+  def initialize(name, price, defence, magic_defence)
+    raise ArgumentError, "無効な名前" if name.nil? || name.empty?
+
+    @name = name
+    @price = price
+    @defence = defence
+    @magic_defence = magic_defence
+  end
+end
+```
+
+nullチェックを避けるために、そもそもnullを取り扱わない設計にすることが大事です。
+「装備がない状態」をnullではなくオブジェクトで表現しています。
+emptyを使えば、Equipment.emptyとして、「装備がない状態」ということがコード上から読み取れるようになります。
+
+### 例外の握りつぶし
+```
+def load_equipment
+  begin
+    read_file
+  rescue StandardError
+    # 何の処理もしていない
+  end
+end
+
+def read_file
+  raise "読み込みエラー"
+end
+```
+
+**rescue StandardError**で例外をキャッチしていますが、何の処理もしていません。
+そのため、これは**例外の握りつぶし**と呼ばれます
+
+```
+def load_equipment
+  begin
+    read_file
+  rescue StandardError => e
+    puts "装備読み込み失敗"
+    raise e
+  end
+end
+
+def read_file
+  raise "読み込みエラー"
+end
+```
+
+今回の例では例外をキャッチした場合、確実にエラー通知を要求するロジックを実装します。
+
+## 名前設計
+### 名前を設計する
+
+名前はコードの可読性を高める以上の効果があります。
+下記が重要なポイント。
+
+- 可能な限り具体的で、意味範囲が狭い、特化した名前を選ぶ
+  - 名前に関係のないロジックを排除できたり、仕様変更時の影響範囲が小さくすむ。
+- 存在ベースではなく、目的ベースで名前を考える
+  - 「存在ベース」のように単純に存在を示すだけの名前は、意味が多重になりがちで、目的不明オブジェクトになります。ロジックレベルで混乱をきたします。
+  - 「目的ベース」のように具体的な目的がわかるようにする。
+  - 下記が「存在ベース」と「目的ベース」の例になります。
+
+    | 存在ベース | 目的ベース |
+    ---|---|
+    | 住所 | 配送元、配送先、勤務先、本籍地 |
+    | 金額 | 請求金額、消費税額、延滞保証料、キャンペーン割引料金 |
+    | ユーザー | アカウント、個人プロフィール、職務経歴 |
+    | ユーザー名 | アカウント名、表示名、本名、法人名 |
+    | 商品 | 入庫品、予約品、注文品、配送品 |
+- どんな関心事があるか分析する
+  - 登場人物や事柄を列挙したり、関係性を整理、分析する。
+- 声に出して話してみる
+  - ラバーダッキングのように会話することで整理されたり、無駄に気づくことができる
+    <details>
+    <summary>ラバーダッキングとは</summary>
+
+      ラバーダッキングとは、問題解決のために  
+      自分の考えを誰かに説明することで整理する手法です。
+    </details>
+- 利用規約を読んでみる
+  - サービスの取扱やルールが厳密に書かれているので、特化した名前の設計に役立つ
+    - 「購入者」、「出品者」、「売買契約」などの厳密な名前が例として挙げられます。
+- 違う名前に置き換えられないか検討する
+  - 意味範囲が適切か、複数の意味を持っていないか検討する。
+  - また、違う名前を探すには類語辞典などを使うと役に立つ。
+- 疎結合高凝集になっているか点検する
+  - 目的以外のロジックが混入していないかチェックする。
+  - ほかのクラスとどれくらい関連つけられているかも気をつける。
+  - 何個も関連つけられている場合は密結合の危険性があるのでもっと狭い意味での名前にして分割するなど検討する
+
+### 名前の省略
+```
+tr_fee = br_fee + LRF * dod
+```
+
+省略した名前だと意図がわからなくなります。
+実際はレンタル料金総額の計算式で「基本料金 + 延滞料 + 延滞日数」ですが、コードからは読み取れないです。
+
+```
+total_rental_fee = basic_rental_fee + LATE_RENTAL_FEE_PER_DAY * days_overdue
+```
+
+全ての命名に言えることですあ、メソッド名やクラス名、パッケージ名なども省略せずに書きましょう。
+そうすることで可読性が上がり、他のメンバーや将来の自分を助けることになります。
+ただしSNSやVIPといった、慣習的に省略形が使われており、意味が通じるものは問題ありません。
+
+## コメント
+### 意図や仕様変更時の注意点を読み手に伝える
+
+```
+class Member
+  def initialize(states)
+    @states = states
+  end
+
+  # 苦しい状態の場合はtrueを返す
+  def painful?
+    # 今後の仕様変更で状態異常による表情変化が追加される場合、
+    # 本メソッドへロジックを追加すること
+    if @states.include?(StateType::POISON) ||
+       @states.include?(StateType::PARALYZED) ||
+       @states.include?(StateType::FEAR)
+      return true
+    end
+
+    false
+  end
+end
+```
+
+コード保守の際、読み手が気にするのは「このロジックはどういう意図で動いているのか」です。
+仕様変更の際、読み手が気にするのは「何に注意すれば安全に変更できるか」です。
+これらの課題を解決できるよう、意図や仕様変更時の注意点をコメントします。
