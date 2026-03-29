@@ -1,9 +1,9 @@
 ---
-title: "良いコード／悪いコード要点まとめ"
+title: "良いコード／悪いコードを「実務で使える形」に要約してみた"
 emoji: "📘"
 type: "tech"
 topics: ["設計", "技術書", "リファクタリング", "レビュー", "コーディング"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -91,11 +91,12 @@ money.instance_variable_set(:@amount, 200)
 
 ```
 class Money
-# 省略
+  # 省略
   def add(other)
     added = @amount + other.amount
     Money.new(added, @currency)
   end
+end
 ```
 
 値を変更したい場合でも、インスタンス変数の値を書き換えることはしません。
@@ -143,50 +144,44 @@ end
 ## 低凝集
 
 ```
-class GiftPoint {
-  private static final int MIN_POINT = 0;
-  final int value;
+class GiftPoint
+  MIN_POINT = 0
 
-  GiftPoint(final int point) {
-    if (point < MIN_POINT) {
-      throw new IllegalArgumentException("ポイントが0以上ではありません。");
-    }
+  attr_reader :value
 
-    value = point;
-  }
+  def initialize(point)
+    if point < MIN_POINT
+      raise ArgumentError, "ポイントが0以上ではありません。"
+    end
 
-  /**
-   * ポイントを加算する。
-   *
-   * @param other 加算ポイント
-   * @return 加算後の残余ポイント
-   */
-  GiftPoint add(final GiftPoint other) {
-    return new GiftPoint(value + other.value);
-  }
+    @value = point
+  end
 
-  /**
-   * @return 残余ポイントが消費ポイント以上であればtrue
-   */
-  boolean isEnough(final ConsumptionPoint point) {
-    return point.value <= value;
-  }
+  # ポイントを加算する
+  # @param other [GiftPoint]
+  # @return [GiftPoint]
+  def add(other)
+    GiftPoint.new(@value + other.value)
+  end
 
-  /**
-   * ポイントを消費する。
-   *
-   * @param point 消費ポイント
-   * @return 消費後の残余ポイント
-   */
-  GiftPoint consume(final ConsumptionPoint point) {
-    if (!isEnough(point)) {
-      throw new IllegalArgumentException("ポイントが不足しています。");
-    }
+  # 残余ポイントが消費ポイント以上であればtrue
+  # @param point [ConsumptionPoint]
+  # @return [Boolean]
+  def enough?(point)
+    point.value <= @value
+  end
 
-    return new GiftPoint(value - point.value);
-  }
-}
+  # ポイントを消費する
+  # @param point [ConsumptionPoint]
+  # @return [GiftPoint]
+  def consume(point)
+    unless enough?(point)
+      raise ArgumentError, "ポイントが不足しています。"
+    end
 
+    GiftPoint.new(@value - point.value)
+  end
+end
 ```
 
 一見このGiftPointクラスにはポイントの加算メソッドや消費メソッドが定義されており、ギフトポイントに関するロジックが十分に凝集されているように見えます。
@@ -671,8 +666,9 @@ end
     <details>
     <summary>ラバーダッキングとは</summary>
 
-      ラバーダッキングとは、問題解決のために  
-      自分の考えを誰かに説明することで整理する手法です。
+    ラバーダッキングとは、問題解決のために  
+    自分の考えを誰かに説明することで整理する手法です。
+
     </details>
 - 利用規約を読んでみる
   - サービスの取扱やルールが厳密に書かれているので、特化した名前の設計に役立つ
