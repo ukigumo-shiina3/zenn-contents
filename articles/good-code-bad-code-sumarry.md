@@ -589,8 +589,6 @@ nullチェックが漏れるとバグに繋がります。
 class Equipment
   attr_reader :name, :price, :defence, :magic_defence
 
-  EMPTY = new("装備なし", 0, 0, 0)
-
   def initialize(name, price, defence, magic_defence)
     raise ArgumentError, "無効な名前" if name.nil? || name.empty?
 
@@ -599,6 +597,8 @@ class Equipment
     @defence = defence
     @magic_defence = magic_defence
   end
+
+  EMPTY = new("装備なし", 0, 0, 0)
 end
 ```
 
