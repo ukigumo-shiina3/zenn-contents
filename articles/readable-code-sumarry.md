@@ -47,7 +47,7 @@ data = CSV.read(csv_path, headers: true)
 
 **[名前を見ただけで意味が伝わる場合]**
 
-```
+```ruby
 firebase_user = Firebase::User.find(id)
 csv_data = CSV.read(csv_path, headers: true)
 ```
