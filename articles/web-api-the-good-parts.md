@@ -3,7 +3,7 @@ title: "Web API設計で最初に知っておきたいこと"
 emoji: "🏗️"
 type: "tech"
 topics: ["Web", "API", "Web API", "設計", "URI"]
-published: false
+published: true
 ---
 
 ## はじめに
